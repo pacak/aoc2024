@@ -46,6 +46,53 @@ fn part1(input: &HashMap<(i32, i32), char>) -> u32 {
         }
     }
 
+    // never actually reach here
+    count
+}
+
+#[aoc(day4, part2)]
+fn part2(input: &HashMap<(i32, i32), char>) -> u32 {
+    let get = |x: i32, y: i32| input.get(&(x, y)).copied().unwrap_or('?');
+    let mut count = 0;
+
+    for y in 0i32.. {
+        if !input.contains_key(&(0, y)) {
+            return count;
+        }
+        'next_cell: for x in 0i32.. {
+            if !input.contains_key(&(x, y)) {
+                break;
+            }
+
+            if get(x, y) != 'A' {
+                continue;
+            }
+            for dx in &[-1, 1] {
+                for dy in &[-1, 1] {
+                    // for each starting cell check 4 possible positions for the main diagonal
+                    if !(get(x - dx, y - dy) == 'M' && get(x + dx, y + dy) == 'S') {
+                        continue;
+                    }
+
+                    let (sx, sy) = match (dx, dy) {
+                        (-1, -1) => (1, -1),
+                        (1, -1) => (1, 1),
+                        (1, 1) => (-1, 1),
+                        (-1, 1) => (-1, -1),
+                        _ => unreachable!(),
+                    };
+
+                    let letters = (get(x - sx, y - sy), get(x + sx, y + sy));
+                    if letters == ('M', 'S') || letters == ('S', 'M') {
+                        count += 1;
+                        continue 'next_cell;
+                    }
+                }
+            }
+        }
+    }
+
+    // not reaching here
     count
 }
 
@@ -62,4 +109,19 @@ SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX";
     assert_eq!(part1(&parse(input)), 18);
+}
+
+#[test]
+fn part2_test() {
+    let input = "MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX";
+    assert_eq!(part2(&parse(input)), 9);
 }
