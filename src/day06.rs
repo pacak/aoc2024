@@ -80,11 +80,7 @@ fn part1(input: &(Guard, TwoDee<bool>)) -> usize {
         } else {
             guard.advance();
         }
-
         visited.insert((guard.x, guard.y));
-        if guard == *guard_start {
-            break;
-        }
     }
     visited.len()
 }
