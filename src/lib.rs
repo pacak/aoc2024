@@ -65,8 +65,33 @@ where
 impl<T> TwoDee<T> {
     fn get(&self, point: (usize, usize)) -> Option<&T> {
         let (x, y) = point;
+        if y > self.width || x > self.width {
+            return None;
+        }
         let i: usize = x + y * self.width;
         self.data.get(i)
+    }
+
+    fn get_mut(&mut self, point: (usize, usize)) -> Option<&mut T> {
+        let (x, y) = point;
+        if y > self.width || x > self.width {
+            return None;
+        }
+        let i: usize = x + y * self.width;
+        self.data.get_mut(i)
+    }
+}
+
+impl<T> std::ops::Index<(usize, usize)> for TwoDee<T> {
+    type Output = T;
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        self.get(index).unwrap()
+    }
+}
+
+impl<T> std::ops::IndexMut<(usize, usize)> for TwoDee<T> {
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        self.get_mut(index).unwrap()
     }
 }
 
