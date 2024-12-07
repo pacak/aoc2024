@@ -20,6 +20,14 @@ fn part1(input: &[Vec<u64>]) -> u64 {
         .sum()
 }
 
+#[aoc(day7, part2)]
+fn part2(input: &[Vec<u64>]) -> u64 {
+    input
+        .iter()
+        .filter_map(|l| can_be_solved2(l).then_some(l[0]))
+        .sum()
+}
+
 fn can_be_solved(input: &[u64]) -> bool {
     let mut cursor = 1;
     let mut cur = vec![input[cursor]];
@@ -29,6 +37,42 @@ fn can_be_solved(input: &[u64]) -> bool {
             .into_iter()
             // list Monad my beloved :)
             .flat_map(|i| [i + input[cursor], i * input[cursor]])
+            .collect();
+    }
+    cur.contains(&input[0])
+}
+
+fn pipes(a: u64, b: u64) -> u64 {
+    if b == 0 {
+        a * 10
+    } else {
+        a * 10u64.pow(b.ilog10() + 1) + b
+    }
+}
+
+#[test]
+fn pipes_works() {
+    assert_eq!(1234, pipes(0, 1234));
+    assert_eq!(1234, pipes(1, 234));
+    assert_eq!(1234, pipes(123, 4));
+    assert_eq!(12340, pipes(1234, 0));
+}
+
+fn can_be_solved2(input: &[u64]) -> bool {
+    let mut cursor = 1;
+    let mut cur = vec![input[cursor]];
+    while cursor < input.len() - 1 {
+        cursor += 1;
+        cur = cur
+            .into_iter()
+            // list Monad my beloved :)
+            .flat_map(|i| {
+                [
+                    i + input[cursor],
+                    i * input[cursor],
+                    pipes(i, input[cursor]),
+                ]
+            })
             .collect();
     }
     cur.contains(&input[0])
