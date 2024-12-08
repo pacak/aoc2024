@@ -7,6 +7,7 @@ mod day04;
 mod day05;
 mod day06;
 mod day07;
+mod day08;
 
 impl std::fmt::Debug for TwoDee<bool> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -64,6 +65,17 @@ where
 }
 
 impl<T> TwoDee<T> {
+    fn new(width: usize) -> Self
+    where
+        T: Default + Copy,
+    {
+        let v = T::default();
+        Self {
+            width,
+            data: vec![v; width * width],
+            poi: (1_000_000, 1_000_000),
+        }
+    }
     fn get(&self, point: (usize, usize)) -> Option<&T> {
         let (x, y) = point;
         if y > self.width || x > self.width {
@@ -93,6 +105,62 @@ impl<T> std::ops::Index<(usize, usize)> for TwoDee<T> {
 impl<T> std::ops::IndexMut<(usize, usize)> for TwoDee<T> {
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
         self.get_mut(index).unwrap()
+    }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+impl Point {
+    fn guard(self, dim: usize) -> Option<Self> {
+        if self.x < 0 || self.y < 0 || self.x as usize >= dim || self.y as usize >= dim {
+            None
+        } else {
+            Some(self)
+        }
+    }
+}
+
+impl std::ops::Sub for Point {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+impl std::ops::Add for Point {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl std::ops::Mul<i32> for Point {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+impl From<Point> for (usize, usize) {
+    fn from(value: Point) -> Self {
+        let v = value.guard(1_000_000).unwrap();
+        (v.x as usize, v.y as usize)
     }
 }
 
