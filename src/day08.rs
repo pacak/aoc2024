@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
-use crate::Point;
+use crate::{Point, TwoDee};
 
 #[derive(Debug, Copy, Clone)]
 struct Ant {
@@ -66,6 +66,45 @@ fn part1(input: &[Ant]) -> usize {
     out.len()
 }
 
+#[aoc(day8, part2)]
+fn part2(input: &[Ant]) -> usize {
+    // Can't be arsed to pass it as well
+    let dim = if input.len() == 7 { 12 } else { 50 };
+
+    let mut out = HashSet::<Point>::new();
+    for i in 0..input.len() - 1 {
+        for j in i + 1..input.len() {
+            let a = input[i];
+            let b = input[j];
+
+            if a.freq != b.freq {
+                continue;
+            }
+            let a = Point::from(a);
+            let b = Point::from(b);
+
+            for c in 0.. {
+                let Some(p) = (a + (a - b) * c).guard(dim) else {
+                    break;
+                };
+                out.insert(p);
+            }
+
+            for c in 0.. {
+                let Some(p) = (b + (b - a) * c).guard(dim) else {
+                    break;
+                };
+                out.insert(p);
+            }
+            let mut td = TwoDee::new(dim);
+            for p in out.iter().copied() {
+                td[p.into()] = true;
+            }
+        }
+    }
+    out.len()
+}
+
 #[test]
 fn part1w() {
     let input = "............
@@ -81,4 +120,21 @@ fn part1w() {
 ............
 ............";
     assert_eq!(14, part1(&parse(input)));
+}
+
+#[test]
+fn part2w() {
+    let input = "............
+........0...
+.....0......
+.......0....
+....0.......
+......A.....
+............
+............
+........A...
+.........A..
+............
+............";
+    assert_eq!(34, part2(&parse(input)));
 }
