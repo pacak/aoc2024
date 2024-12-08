@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
-use crate::{Point, TwoDee};
+use crate::Point;
 
 #[derive(Debug, Copy, Clone)]
 struct Ant {
@@ -70,8 +70,9 @@ fn part1(input: &[Ant]) -> usize {
 fn part2(input: &[Ant]) -> usize {
     // Can't be arsed to pass it as well
     let dim = if input.len() == 7 { 12 } else { 50 };
+    let mut cnt = 0;
 
-    let mut out = HashSet::<Point>::new();
+    let mut out = vec![false; dim * dim];
     for i in 0..input.len() - 1 {
         for j in i + 1..input.len() {
             let a = input[i];
@@ -87,22 +88,25 @@ fn part2(input: &[Ant]) -> usize {
                 let Some(p) = (a + (a - b) * c).guard(dim) else {
                     break;
                 };
-                out.insert(p);
+                if !out[(p.x + p.y * dim as i32) as usize] {
+                    cnt += 1;
+                }
+                out[(p.x + p.y * dim as i32) as usize] = true;
             }
 
             for c in 0.. {
                 let Some(p) = (b + (b - a) * c).guard(dim) else {
                     break;
                 };
-                out.insert(p);
-            }
-            let mut td = TwoDee::new(dim);
-            for p in out.iter().copied() {
-                td[p.into()] = true;
+
+                if !out[(p.x + p.y * dim as i32) as usize] {
+                    cnt += 1;
+                }
+                out[(p.x + p.y * dim as i32) as usize] = true;
             }
         }
     }
-    out.len()
+    cnt
 }
 
 #[test]
