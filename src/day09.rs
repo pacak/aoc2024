@@ -42,6 +42,42 @@ fn part1(input: &[Option<usize>]) -> usize {
     checksum(&input)
 }
 
+#[aoc(day9, part2)]
+fn part2(input: &[Option<usize>]) -> usize {
+    let mut input = input.to_vec();
+    let mut j = input.len() - 1;
+    while j > 0 {
+        // Keep scanning until the next file
+        if input[j].is_none() {
+            j -= 1;
+            continue;
+        }
+
+        let mut jstart = j;
+        while jstart > 0 && input[jstart] == input[j] {
+            jstart -= 1;
+        }
+
+        // Found a file
+        let file = jstart + 1..j + 1;
+
+        // found a hole of the right size
+        if let Some(hole) = input[..jstart + 1]
+            .windows(j - jstart)
+            .position(|xs| xs.iter().all(|i| i.is_none()))
+        {
+            input.copy_within(file.clone(), hole);
+            for erase in file {
+                input[erase] = None;
+            }
+        };
+
+        j = jstart;
+    }
+
+    checksum(&input)
+}
+
 fn checksum(input: &[Option<usize>]) -> usize {
     input
         .iter()
@@ -54,4 +90,10 @@ fn checksum(input: &[Option<usize>]) -> usize {
 fn part1w() {
     let input = "2333133121414131402";
     assert_eq!(1928, part1(&parse(input)));
+}
+
+#[test]
+fn part2w() {
+    let input = "2333133121414131402";
+    assert_eq!(2858, part2(&parse(input)));
 }
