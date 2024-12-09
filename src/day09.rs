@@ -1,10 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 
-#[derive(Debug)]
-struct Block {
-    id: Option<u8>,
-}
-
 #[aoc_generator(day9)]
 fn parse(input: &str) -> Vec<Option<usize>> {
     let mut file = true;
