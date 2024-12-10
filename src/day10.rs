@@ -25,6 +25,20 @@ fn part1(input: &TwoDee<u8>) -> usize {
     count
 }
 
+#[aoc(day10, part1, bfs)]
+fn part1bfs(input: &TwoDee<u8>) -> usize {
+    let accessible = populate_bfs(input);
+    let mut count = 0;
+    for x in 0..input.width {
+        for y in 0..input.width {
+            if input[(x, y)] == 0 {
+                count += accessible[(x, y)].len();
+            }
+        }
+    }
+    count
+}
+
 fn populate_bfs(input: &TwoDee<u8>) -> TwoDee<HashMap<Point, usize>> {
     let mut accessible: TwoDee<HashMap<Point, usize>> = input.map(|_| HashMap::new());
     let mut current = HashSet::new();
@@ -41,7 +55,6 @@ fn populate_bfs(input: &TwoDee<u8>) -> TwoDee<HashMap<Point, usize>> {
     }
 
     for h in [8, 7, 6, 5, 4, 3, 2, 1, 0] {
-        //        println!("Looking for points of height {h:?} adjacent to {current:?}");
         for from in current.drain() {
             for dir in &[Point::L, Point::R, Point::U, Point::D] {
                 let Some(to) = (*dir + from).guard(input.width) else {
@@ -54,6 +67,22 @@ fn populate_bfs(input: &TwoDee<u8>) -> TwoDee<HashMap<Point, usize>> {
                     for (k, v) in from_s {
                         *to_s.entry(*k).or_default() += *v;
                     }
+                }
+            }
+        }
+        std::mem::swap(&mut new, &mut current);
+    }
+
+    accessible
+}
+
+fn populate(input: &TwoDee<u8>) -> TwoDee<HashMap<Point, usize>> {
+    let mut accessible: TwoDee<HashMap<Point, usize>> = input.map(|_| HashMap::new());
+    for h in [9, 8, 7, 6, 5, 4, 3, 2, 1, 0] {
+        for x in 0..input.width {
+            for y in 0..input.width {
+                if input[(x, y)] != h {
+                    continue;
                 }
                 if h == 9 {
                     accessible[(x, y)].insert(Point::new(x, y), 1);
@@ -77,7 +106,6 @@ fn populate_bfs(input: &TwoDee<u8>) -> TwoDee<HashMap<Point, usize>> {
     }
     accessible
 }
-
 #[aoc(day10, part2)]
 fn part2(input: &TwoDee<u8>) -> usize {
     let accessible = populate(input);
