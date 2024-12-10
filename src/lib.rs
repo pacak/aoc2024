@@ -89,6 +89,7 @@ where
 }
 
 impl<T> TwoDee<T> {
+    #![allow(dead_code)]
     fn new(width: usize) -> Self
     where
         T: Default + Copy,
