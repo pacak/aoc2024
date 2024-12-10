@@ -1,3 +1,4 @@
+mod day10;
 use aoc_runner_derive::aoc_lib;
 
 mod day01;
@@ -9,6 +10,28 @@ mod day06;
 mod day07;
 mod day08;
 mod day09;
+
+impl std::fmt::Debug for TwoDee<u8> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut col = 0;
+        let mut row = 0;
+        writeln!(f)?;
+        for c in self.data.iter() {
+            if self.poi == (col, row) {
+                write!(f, "X")?;
+            } else {
+                write!(f, "{c}")?;
+            }
+            col += 1;
+            if col == self.width {
+                col = 0;
+                row += 1;
+                writeln!(f)?;
+            }
+        }
+        Ok(())
+    }
+}
 
 impl std::fmt::Debug for TwoDee<bool> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -60,7 +83,7 @@ where
         Self {
             data,
             width,
-            poi: (0, 0),
+            poi: (1_000_000, 1_000_000),
         }
     }
 }
@@ -77,6 +100,15 @@ impl<T> TwoDee<T> {
             poi: (1_000_000, 1_000_000),
         }
     }
+
+    fn map<U>(&self, f: impl FnMut(&T) -> U) -> TwoDee<U> {
+        TwoDee {
+            width: self.width,
+            data: self.data.iter().map(f).collect::<Vec<_>>(),
+            poi: self.poi,
+        }
+    }
+
     fn get(&self, point: (usize, usize)) -> Option<&T> {
         let (x, y) = point;
         if y > self.width || x > self.width {
@@ -109,6 +141,19 @@ impl<T> std::ops::IndexMut<(usize, usize)> for TwoDee<T> {
     }
 }
 
+impl<T> std::ops::Index<Point> for TwoDee<T> {
+    type Output = T;
+    fn index(&self, index: Point) -> &Self::Output {
+        self.get(index.into()).unwrap()
+    }
+}
+
+impl<T> std::ops::IndexMut<Point> for TwoDee<T> {
+    fn index_mut(&mut self, index: Point) -> &mut Self::Output {
+        self.get_mut(index.into()).unwrap()
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 struct Point {
     x: i32,
@@ -116,6 +161,16 @@ struct Point {
 }
 
 impl Point {
+    const U: Self = Point { x: 0, y: -1 };
+    const D: Self = Point { x: 0, y: 1 };
+    const L: Self = Point { x: -1, y: 0 };
+    const R: Self = Point { x: 1, y: 0 };
+    fn new(x: usize, y: usize) -> Self {
+        Self {
+            x: x as i32,
+            y: y as i32,
+        }
+    }
     fn guard(self, dim: usize) -> Option<Self> {
         if self.x < 0 || self.y < 0 || self.x as usize >= dim || self.y as usize >= dim {
             None
