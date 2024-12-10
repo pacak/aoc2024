@@ -43,10 +43,9 @@ fn populate(input: &TwoDee<u8>) -> TwoDee<HashMap<Point, usize>> {
                         };
 
                         if input[p] + 1 == input[adj] {
-                            // TwoDee - split at mut?
-                            let to_add = accessible[adj].clone();
-                            for (k, v) in to_add {
-                                *accessible[p].entry(k).or_default() += v;
+                            let (from, to) = accessible.get_two_mut(adj, p).unwrap();
+                            for (k, v) in from {
+                                *to.entry(*k).or_default() += *v;
                             }
                         }
                     }

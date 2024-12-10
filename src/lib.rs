@@ -101,6 +101,25 @@ impl<T> TwoDee<T> {
         }
     }
 
+    fn get_two_mut(&mut self, a: Point, b: Point) -> Option<(&mut T, &mut T)> {
+        a.guard(self.width)?;
+        b.guard(self.width)?;
+        let ia = a.x as usize + a.y as usize * self.width;
+        let ib = b.x as usize + b.y as usize * self.width;
+
+        match ia.cmp(&ib) {
+            std::cmp::Ordering::Less => {
+                let (before, after) = self.data.split_at_mut(ib);
+                Some((&mut before[ia], &mut after[0]))
+            }
+            std::cmp::Ordering::Equal => None,
+            std::cmp::Ordering::Greater => {
+                let (before, after) = self.data.split_at_mut(ia);
+                Some((&mut after[0], &mut before[ib]))
+            }
+        }
+    }
+
     fn map<U>(&self, f: impl FnMut(&T) -> U) -> TwoDee<U> {
         TwoDee {
             width: self.width,
