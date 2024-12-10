@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::{Point, TwoDee};
 use aoc_runner_derive::{aoc, aoc_generator};
@@ -22,9 +22,7 @@ fn part1(input: &TwoDee<u8>) -> usize {
                     continue;
                 }
                 if h == 9 {
-                    let mut h = HashSet::new();
-                    h.insert(Point::new(x, y));
-                    accessible[(x, y)] = h;
+                    accessible[(x, y)].insert(Point::new(x, y));
                 } else {
                     let p = Point::new(x, y);
                     for dir in &[Point::L, Point::R, Point::U, Point::D] {
@@ -54,8 +52,45 @@ fn part1(input: &TwoDee<u8>) -> usize {
 }
 
 #[aoc(day10, part2)]
-fn part2(input: &TwoDee<u8>) -> u32 {
-    todo!()
+fn part2(input: &TwoDee<u8>) -> usize {
+    let mut accessible: TwoDee<HashMap<Point, usize>> = input.map(|_| HashMap::new());
+    let mut count = 0;
+    for h in [9, 8, 7, 6, 5, 4, 3, 2, 1, 0] {
+        for x in 0..input.width {
+            for y in 0..input.width {
+                if input[(x, y)] != h {
+                    continue;
+                }
+                if h == 9 {
+                    accessible[(x, y)].insert(Point::new(x, y), 1);
+                } else {
+                    let p = Point::new(x, y);
+                    for dir in &[Point::L, Point::R, Point::U, Point::D] {
+                        let Some(adj) = (*dir + p).guard(input.width) else {
+                            continue;
+                        };
+
+                        if input[p] + 1 == input[adj] {
+                            // TwoDee - split at mut?
+                            let to_add = accessible[adj].clone();
+                            for (k, v) in to_add {
+                                *accessible[p].entry(k).or_default() += v;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for x in 0..input.width {
+        for y in 0..input.width {
+            if input[(x, y)] == 0 {
+                count += accessible[(x, y)].values().sum::<usize>();
+            }
+        }
+    }
+    count
 }
 
 #[cfg(test)]
@@ -83,6 +118,22 @@ mod tests {
 
     #[test]
     fn part2_example() {
-        //        assert_eq!(part2(&parse(input)), "<RESULT>");
+        let input = "012345
+123456
+234567
+345678
+416789
+567891";
+        assert_eq!(part2(&parse(input)), 227);
+
+        let input = "89010123
+78121874
+87430965
+96549874
+45678903
+32019012
+01329801
+10456732";
+        assert_eq!(part2(&parse(input)), 81);
     }
 }
