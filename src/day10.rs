@@ -13,34 +13,8 @@ fn parse(input: &str) -> TwoDee<u8> {
 
 #[aoc(day10, part1)]
 fn part1(input: &TwoDee<u8>) -> usize {
-    let mut accessible: TwoDee<HashSet<Point>> = input.map(|_| HashSet::new());
+    let accessible = populate(input);
     let mut count = 0;
-    for h in [9, 8, 7, 6, 5, 4, 3, 2, 1, 0] {
-        for x in 0..input.width {
-            for y in 0..input.width {
-                if input[(x, y)] != h {
-                    continue;
-                }
-                if h == 9 {
-                    accessible[(x, y)].insert(Point::new(x, y));
-                } else {
-                    let p = Point::new(x, y);
-                    for dir in &[Point::L, Point::R, Point::U, Point::D] {
-                        let Some(adj) = (*dir + p).guard(input.width) else {
-                            continue;
-                        };
-
-                        if input[p] + 1 == input[adj] {
-                            // TwoDee - split at mut?
-                            let to_add = accessible[adj].clone();
-                            accessible[p].extend(to_add.into_iter());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     for x in 0..input.width {
         for y in 0..input.width {
             if input[(x, y)] == 0 {
@@ -51,10 +25,8 @@ fn part1(input: &TwoDee<u8>) -> usize {
     count
 }
 
-#[aoc(day10, part2)]
-fn part2(input: &TwoDee<u8>) -> usize {
+fn populate(input: &TwoDee<u8>) -> TwoDee<HashMap<Point, usize>> {
     let mut accessible: TwoDee<HashMap<Point, usize>> = input.map(|_| HashMap::new());
-    let mut count = 0;
     for h in [9, 8, 7, 6, 5, 4, 3, 2, 1, 0] {
         for x in 0..input.width {
             for y in 0..input.width {
@@ -82,6 +54,13 @@ fn part2(input: &TwoDee<u8>) -> usize {
             }
         }
     }
+    accessible
+}
+
+#[aoc(day10, part2)]
+fn part2(input: &TwoDee<u8>) -> usize {
+    let accessible = populate(input);
+    let mut count = 0;
 
     for x in 0..input.width {
         for y in 0..input.width {
