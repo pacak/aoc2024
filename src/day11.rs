@@ -80,6 +80,32 @@ fn part1s(input: &[usize]) -> usize {
     stones.values().copied().sum()
 }
 
+#[aoc(day11, part2, smort)]
+fn part2(input: &[usize]) -> usize {
+    let mut stones = HashMap::<usize, usize>::new();
+    for s in input {
+        *stones.entry(*s).or_default() += 1;
+    }
+
+    let mut output = HashMap::new();
+    for _ in 0..75 {
+        for (k, n) in stones.drain() {
+            match rules(k) {
+                Stones::One(k) => {
+                    *output.entry(k).or_default() += n;
+                }
+                Stones::Two(k1, k2) => {
+                    *output.entry(k1).or_default() += n;
+                    *output.entry(k2).or_default() += n;
+                }
+            }
+        }
+        std::mem::swap(&mut stones, &mut output);
+    }
+
+    stones.values().copied().sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
