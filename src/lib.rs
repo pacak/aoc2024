@@ -1,5 +1,6 @@
-mod day11;
 mod day10;
+mod day11;
+mod day12;
 use aoc_runner_derive::aoc_lib;
 
 mod day01;
@@ -11,6 +12,28 @@ mod day06;
 mod day07;
 mod day08;
 mod day09;
+
+impl std::fmt::Debug for TwoDee<usize> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut col = 0;
+        let mut row = 0;
+        writeln!(f)?;
+        for c in self.data.iter() {
+            if self.poi == (col, row) {
+                write!(f, "X   ")?;
+            } else {
+                write!(f, "{:>4}", c)?;
+            }
+            col += 1;
+            if col == self.width {
+                col = 0;
+                row += 1;
+                writeln!(f)?;
+            }
+        }
+        Ok(())
+    }
+}
 
 impl std::fmt::Debug for TwoDee<u8> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -138,6 +161,13 @@ impl<T> TwoDee<T> {
         let i: usize = x + y * self.width;
         self.data.get(i)
     }
+    fn get_point(&self, point: Point) -> Option<&T> {
+        if point.x < 0 || point.y < 0 {
+            None
+        } else {
+            self.get((point.x as usize, point.y as usize))
+        }
+    }
 
     fn get_mut(&mut self, point: (usize, usize)) -> Option<&mut T> {
         let (x, y) = point;
@@ -191,6 +221,14 @@ impl Point {
             x: x as i32,
             y: y as i32,
         }
+    }
+    fn adjacent(self) -> [Point; 4] {
+        [
+            self + Self::U,
+            self + Self::D,
+            self + Self::L,
+            self + Self::R,
+        ]
     }
     fn guard(self, dim: usize) -> Option<Self> {
         if self.x < 0 || self.y < 0 || self.x as usize >= dim || self.y as usize >= dim {
