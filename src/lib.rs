@@ -155,7 +155,7 @@ impl<T> TwoDee<T> {
 
     fn get(&self, point: (usize, usize)) -> Option<&T> {
         let (x, y) = point;
-        if y > self.width || x > self.width {
+        if y >= self.width || x >= self.width {
             return None;
         }
         let i: usize = x + y * self.width;
@@ -231,12 +231,41 @@ impl Point {
         ]
     }
     fn guard(self, dim: usize) -> Option<Self> {
-        if self.x < 0 || self.y < 0 || self.x as usize >= dim || self.y as usize >= dim {
-            None
-        } else {
+        if (0..dim).contains(&(self.x as usize)) && (0..dim).contains(&(self.y as usize)) {
             Some(self)
+        } else {
+            None
         }
     }
+    fn u(self) -> Point {
+        self + Point::U
+    }
+    fn d(self) -> Point {
+        self + Point::D
+    }
+    fn l(self) -> Point {
+        self + Point::L
+    }
+    fn r(self) -> Point {
+        self + Point::R
+    }
+}
+
+#[test]
+fn point_guard_works() {
+    assert_eq!(Some(Point::new(0, 0)), Point::new(0, 0).guard(1));
+    assert_eq!(None, Point::new(0, 1).guard(1));
+    assert_eq!(None, Point::new(1, 0).guard(1));
+    assert_eq!(None, Point::new(1, 1).guard(1));
+}
+
+#[test]
+fn get_works() {
+    let m = [[()].into_iter()].into_iter().collect::<TwoDee<()>>();
+    assert_eq!(m.get((0, 0)), Some(&()));
+    assert_eq!(m.get((0, 1)), None);
+    assert_eq!(m.get((1, 0)), None);
+    assert_eq!(m.get((1, 1)), None);
 }
 
 impl std::ops::Sub for Point {

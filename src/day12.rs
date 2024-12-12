@@ -96,10 +96,56 @@ fn part1(input: &TwoDee<u8>) -> usize {
         .sum()
 }
 
-// #[aoc(day12, part2)]
-// fn part2(input: &TwoDee<u8>>) -> usize{
-//     todo!()
-// }
+#[aoc(day12, part2)]
+fn part2(input: &TwoDee<u8>) -> usize {
+    let uniq = uniq_regions(input);
+    let mut area = BTreeMap::<usize, usize>::new(); // can be a vector...
+    let mut sides = BTreeMap::<usize, usize>::new(); // can also be a vector
+
+    for id in &uniq.data {
+        *area.entry(*id).or_default() += 1;
+    }
+
+    for x in 0..input.width {
+        for y in 0..input.width {
+            let p = Point::new(x, y);
+
+            // the same region?
+            let has = |tp| uniq.get_point(tp).copied().unwrap_or(usize::MAX) == uniq[p];
+            let mut c = 0;
+
+            let u = has(p.u());
+            let l = has(p.l());
+            let d = has(p.d());
+            let r = has(p.r());
+
+            let ul = has(p.u().l());
+            let ur = has(p.u().r());
+            let dl = has(p.d().l());
+            let dr = has(p.d().r());
+
+            // external corner
+            c += (!u && !l) as usize;
+            c += (!u && !r) as usize;
+            c += (!d && !l) as usize;
+            c += (!d && !r) as usize;
+
+            // internal corner
+            c += (u && l && !ul) as usize;
+            c += (u && r && !ur) as usize;
+            c += (d && l && !dl) as usize;
+            c += (d && r && !dr) as usize;
+
+            *sides.entry(uniq[p]).or_default() += c;
+        }
+    }
+
+    area.values()
+        .zip(sides.values())
+        .map(|(a, p)| *a * *p)
+        .sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -144,6 +190,7 @@ OOOOO
 OXOXO
 OOOOO";
         assert_eq!(part1(&parse(input)), 772);
+
         let input = "\
 RRRRIICCFF
 RRRRIICCCF
@@ -158,8 +205,47 @@ MMMISSJEEE";
         assert_eq!(part1(&parse(input)), 1930);
     }
 
-    // #[test]
-    // fn part2_example() {
-    //     assert_eq!(part2(&parse("<EXAMPLE>")), "<RESULT>");
-    // }
+    #[test]
+    fn part2_example() {
+        let input = "\
+AAA
+ABB
+AAA";
+        assert_eq!(part2(&parse(input)), 8 * 7 + 4 * 2);
+
+        let input = "AA\nAA";
+        assert_eq!(part2(&parse(input)), 4 * 4);
+
+        let input = "\
+AAAA
+BBCD
+BBCC
+EEEC";
+        assert_eq!(part2(&parse(input)), 80);
+
+        let input = "\
+OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO";
+        assert_eq!(part2(&parse(input)), 436);
+
+        let input = "\
+EEEEE
+EXXXX
+EEEEE
+EXXXX
+EEEEE";
+        assert_eq!(part2(&parse(input)), 236);
+
+        let input = "\
+AAAAAA
+AAABBA
+AAABBA
+ABBAAA
+ABBAAA
+AAAAAA";
+        assert_eq!(part2(&parse(input)), 368);
+    }
 }
