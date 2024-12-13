@@ -54,11 +54,11 @@ fn part1(input: &[Ant]) -> usize {
             let a = Point::from(a);
             let b = Point::from(b);
 
-            if let Some(p) = (a * 2 - b).guard(dim) {
+            if let Some(p) = (a * 2i32 - b).guard(dim) {
                 out.insert(p);
             };
 
-            if let Some(p) = (b * 2 - a).guard(dim) {
+            if let Some(p) = (b * 2i32 - a).guard(dim) {
                 out.insert(p);
             };
         }

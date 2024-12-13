@@ -301,6 +301,14 @@ impl std::ops::Mul<i32> for Point {
     }
 }
 
+impl std::ops::Mul<usize> for Point {
+    type Output = Self;
+
+    fn mul(self, rhs: usize) -> Self::Output {
+        self * rhs as i32
+    }
+}
+
 impl From<Point> for (usize, usize) {
     fn from(value: Point) -> Self {
         let v = value.guard(1_000_000).unwrap();
