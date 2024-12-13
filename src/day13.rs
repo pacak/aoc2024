@@ -54,14 +54,80 @@ fn brute(problem: Problem) -> Option<usize> {
     best
 }
 
-#[aoc(day13, part1)]
-fn part1(input: &[Problem]) -> usize {
+fn semismort(problem: Problem, adj: usize) -> Option<usize> {
+    let ax = problem.a.x as usize;
+    let ay = problem.a.y as usize;
+
+    let bx = problem.b.x as usize;
+    let by = problem.b.y as usize;
+
+    let px = problem.prize.x as usize + adj;
+    let py = problem.prize.y as usize + adj;
+
+    // ax * a + bx * b == px     =>  ax  bx | px
+    // ay * a + by * b == py         ay  by | py
+
+    let (c11, c12, v1) = (ax as f64, bx as f64, px as f64);
+    let (c21, c22, v2) = (ay as f64, by as f64, py as f64);
+
+    // change the first line to 1 bx/ax | px/ax
+    let (c11, c12, v1) = (1.0, c12 / c11, v1 / c11);
+
+    //   1 c12 | v1
+    // c21 c22 | v2
+
+    // subtract  (1)*c21 from (2) to get 0 in the first item
+
+    let (c21, c22, v2) = (0.0, c22 - c12 * c21, v2 - v1 * c21);
+
+    //   1  c12 | v1
+    //   0  c22 | v2
+
+    // divide 2nd by c22 to get 0 1 |v2
+    assert_ne!(c22, 0.0);
+
+    let (c21, _c22, v2) = (c21 / c22, 1.0, v2 / c22);
+
+    // 1 c12 | v1
+    // 0   1 | v2
+
+    // subtract (2) * c12 from (1) to get 1 0 | v1
+    let (_c12, _c22, v1) = (c11 - c21 * c12, 0, v1 - c12 * v2);
+
+    // 1 0 | v1
+    // 0 1 | v2
+    // v1, v2 is the answer in f64 form
+
+    // we got an answer, but in f64 form. Real answer is probably around here.
+    for dx in [-1.0, 0.0, 1.0] {
+        for dy in [-1.0, 0.0, 1.0] {
+            let (a, b) = ((v1 + dx) as usize, (v2 + dy) as usize);
+
+            if ax * a + bx * b == px && ay * a + by * b == py {
+                return Some(a * 3 + b);
+            }
+        }
+    }
+
+    None
+}
+
+#[aoc(day13, part1, brute)]
+fn part1b(input: &[Problem]) -> usize {
     input.iter().filter_map(|p| brute(*p)).sum()
+}
+
+#[aoc(day13, part1, semismort)]
+fn part1s(input: &[Problem]) -> usize {
+    input.iter().filter_map(|p| semismort(*p, 0)).sum()
 }
 
 #[aoc(day13, part2)]
 fn part2(input: &[Problem]) -> usize {
-    todo!()
+    input
+        .iter()
+        .filter_map(|p| semismort(*p, 10_000_000_000_000))
+        .sum()
 }
 
 #[cfg(test)]
@@ -87,11 +153,28 @@ Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279";
 
-        assert_eq!(part1(&parse(input)), 480);
+        assert_eq!(part1s(&parse(input)), 480);
     }
 
-    // #[test]
-    // fn part2_example() {
-    //     assert_eq!(part2(&parse("<EXAMPLE>")), "<RESULT>");
-    // }
+    #[test]
+    fn part2_example() {
+        let input = "\
+Button A: X+94, Y+34
+Button B: X+22, Y+67
+Prize: X=8400, Y=5400
+
+Button A: X+26, Y+66
+Button B: X+67, Y+21
+Prize: X=12748, Y=12176
+
+Button A: X+17, Y+86
+Button B: X+84, Y+37
+Prize: X=7870, Y=6450
+
+Button A: X+69, Y+23
+Button B: X+27, Y+71
+Prize: X=18641, Y=10279";
+
+        assert_eq!(part2(&parse(input)), 875318608908);
+    }
 }
