@@ -52,17 +52,21 @@ fn part2(input: &[Robot]) -> usize {
 
             grid[Point { x, y }] = true;
         }
-        let mut t = 0;
+        let mut maxspan = 0;
+        let mut span = 0;
+
         for y in 0..100 {
             if grid[(width as usize / 2, y)] {
-                t += 1;
+                span += 1;
+                maxspan = maxspan.max(span);
+            } else {
+                span = 0;
             }
         }
-        if t > 20 {
+
+        if maxspan > 10 {
             println!("at {time:?}: {grid:?}");
-        }
-        if t == 7572 {
-            return 7572;
+            return time as usize;
         }
     }
 }
