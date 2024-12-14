@@ -1,7 +1,7 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use regex::Regex;
 
-use crate::Point;
+use crate::{Point, TwoDee};
 
 #[derive(Debug, Copy, Clone)]
 struct Robot {
@@ -38,7 +38,33 @@ fn part1(input: &[Robot]) -> usize {
 
 #[aoc(day14, part2)]
 fn part2(input: &[Robot]) -> usize {
-    todo!()
+    let mut grid = TwoDee::<bool>::new(110);
+
+    let mut time = 0;
+    let width = 101;
+    let height = 103;
+    loop {
+        time += 1;
+        grid.data.iter_mut().for_each(|p| *p = false);
+        for r in input {
+            let x = ((r.position.x + r.vector.x * time) % width + width) % width;
+            let y = ((r.position.y + r.vector.y * time) % height + height) % height;
+
+            grid[Point { x, y }] = true;
+        }
+        let mut t = 0;
+        for y in 0..100 {
+            if grid[(width as usize / 2, y)] {
+                t += 1;
+            }
+        }
+        if t > 20 {
+            println!("at {time:?}: {grid:?}");
+        }
+        if t == 7572 {
+            return 7572;
+        }
+    }
 }
 
 fn solver(input: &[Robot], width: i32, height: i32, time: i32) -> usize {

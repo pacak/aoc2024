@@ -1,8 +1,8 @@
-mod day14;
 mod day10;
 mod day11;
 mod day12;
 mod day13;
+mod day14;
 use aoc_runner_derive::aoc_lib;
 
 mod day01;
@@ -115,7 +115,6 @@ where
 }
 
 impl<T> TwoDee<T> {
-    #![allow(dead_code)]
     fn new(width: usize) -> Self
     where
         T: Default + Copy,
