@@ -1,8 +1,3 @@
-mod day10;
-mod day11;
-mod day12;
-mod day13;
-mod day14;
 use aoc_runner_derive::aoc_lib;
 
 mod day01;
@@ -14,6 +9,12 @@ mod day06;
 mod day07;
 mod day08;
 mod day09;
+mod day10;
+mod day11;
+mod day12;
+mod day13;
+mod day14;
+mod day15;
 
 impl std::fmt::Debug for TwoDee<usize> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
