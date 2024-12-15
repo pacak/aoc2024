@@ -213,6 +213,26 @@ struct Point {
     y: i32,
 }
 
+impl std::fmt::Display for Point {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            if *self == Self::U {
+                "^"
+            } else if *self == Self::D {
+                "v"
+            } else if *self == Self::L {
+                "<"
+            } else if *self == Self::R {
+                ">"
+            } else {
+                "?"
+            }
+        )
+    }
+}
+
 impl Point {
     const U: Self = Point { x: 0, y: -1 };
     const D: Self = Point { x: 0, y: 1 };
