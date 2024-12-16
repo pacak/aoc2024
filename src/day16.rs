@@ -170,13 +170,7 @@ fn part2(input: &(TwoDee<bool>, Point, Point)) -> usize {
             let prev = *best.get(&t).unwrap_or(&100000000000000);
 
             if prev >= s.score {
-                if s.score > prev + 1000 {
-                    continue;
-                }
-                if prev >= s.score {
-                    best.insert(t, s.score);
-                }
-
+                best.insert(t, s.score);
                 q.push(s);
             }
         }
