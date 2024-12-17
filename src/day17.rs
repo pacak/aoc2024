@@ -7,6 +7,7 @@ struct Puter {
     c: usize,
     ip: usize,
     code: Vec<Instr>,
+    raw: String,
 }
 
 #[derive(Debug, Clone)]
@@ -58,6 +59,17 @@ enum CoOp {
     C,
 }
 
+impl std::fmt::Display for CoOp {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CoOp::Lit(l) => write!(f, "{l}"),
+            CoOp::A => write!(f, "A"),
+            CoOp::B => write!(f, "B"),
+            CoOp::C => write!(f, "C"),
+        }
+    }
+}
+
 impl Puter {
     fn resolve(&self, op: &CoOp) -> usize {
         match op {
@@ -69,59 +81,17 @@ impl Puter {
     }
 }
 
-#[aoc_generator(day17)]
-fn parse(input: &str) -> Puter {
-    let mut input = input.lines();
-    let a = input.next().unwrap()[12..].parse().unwrap();
-    let b = input.next().unwrap()[12..].parse().unwrap();
-    let c = input.next().unwrap()[12..].parse().unwrap();
-    input.next();
-    let mut bytes = input.next().unwrap()[9..]
-        .split(',')
-        .map(|c| c.parse::<usize>().unwrap());
-    let mut code = Vec::new();
-    let mk = |v| match v {
-        0..=3 => CoOp::Lit(v),
-        4 => CoOp::A,
-        5 => CoOp::B,
-        6 => CoOp::C,
-        _ => panic!(),
-    };
-    while let Some(instr) = bytes.next() {
-        let op = bytes.next().unwrap();
-        use Instr as I;
-        code.push(match instr {
-            0 => I::Adv(mk(op)),
-            1 => I::Bxl(op),
-            2 => I::Bst(mk(op)),
-            3 => I::Jnz(op),
-            4 => I::Bxc(op),
-            5 => I::Out(mk(op)),
-            6 => I::Bdv(mk(op)),
-            7 => I::Cdv(mk(op)),
-            _ => panic!(),
-        });
-    }
-
-    Puter {
-        a,
-        b,
-        c,
-        ip: 0,
-        code,
-    }
-}
-
-#[aoc(day17, part1)]
-fn part1(input: &Puter) -> String {
-    let mut out = String::new();
-    let mut puter = input.clone();
-
+fn eval(puter: &mut Puter, out: &mut String, sp: bool) {
     loop {
+        if sp && !puter.raw.starts_with(out.as_str()) {
+            break;
+        }
+
         let Some(instr) = puter.code.get(puter.ip) else {
             break;
         };
-
+        //        println!("{instr:?}");
+        //        println!("{:?}, {:?}", out, puter.raw);
         match instr {
             Instr::Adv(op) => {
                 puter.a /= 2usize.pow(puter.resolve(op) as u32);
@@ -158,13 +128,97 @@ fn part1(input: &Puter) -> String {
         }
         puter.ip += 1;
     }
+}
 
+#[aoc_generator(day17)]
+fn parse(input: &str) -> Puter {
+    let mut input = input.lines();
+    let a = input.next().unwrap()[12..].parse().unwrap();
+    let b = input.next().unwrap()[12..].parse().unwrap();
+    let c = input.next().unwrap()[12..].parse().unwrap();
+    input.next();
+    let raw = input.next().unwrap()[9..].to_owned();
+    let mut bytes = raw.split(',').map(|c| c.parse::<usize>().unwrap());
+    let mut code = Vec::new();
+    let mk = |v| match v {
+        0..=3 => CoOp::Lit(v),
+        4 => CoOp::A,
+        5 => CoOp::B,
+        6 => CoOp::C,
+        _ => panic!(),
+    };
+    while let Some(instr) = bytes.next() {
+        let op = bytes.next().unwrap();
+        use Instr as I;
+        code.push(match instr {
+            0 => I::Adv(mk(op)),
+            1 => I::Bxl(op),
+            2 => I::Bst(mk(op)),
+            3 => I::Jnz(op),
+            4 => I::Bxc(op),
+            5 => I::Out(mk(op)),
+            6 => I::Bdv(mk(op)),
+            7 => I::Cdv(mk(op)),
+            _ => panic!(),
+        });
+    }
+
+    Puter {
+        a,
+        b,
+        c,
+        ip: 0,
+        code,
+        raw,
+    }
+}
+
+#[aoc(day17, part1)]
+fn part1(input: &Puter) -> String {
+    let mut out = String::new();
+    let mut puter = input.clone();
+    eval(&mut puter, &mut out, false);
     out
 }
 
 #[aoc(day17, part2)]
-fn part2(input: &Puter) -> String {
-    todo!()
+fn part2(input: &Puter) -> usize {
+    for i in &input.code {
+        match i {
+            Instr::Adv(c) => println!("a /= {c}"),
+            Instr::Bxl(l) => println!("b ^= {l}"),
+            Instr::Bst(c) => println!("b = {c} % 8"),
+            Instr::Jnz(l) => println!("jump {l}"),
+            Instr::Bxc(l) => println!("b ^= c"),
+            Instr::Out(c) => println!("write {c} % 8"),
+            Instr::Bdv(c) => println!("b = a / {c}"),
+            Instr::Cdv(c) => println!("c = a / {c}"),
+        }
+    }
+    println!("{:?}", input.code);
+    println!("{:?}", input.raw.len());
+    let mut out = String::new();
+
+    for s in 0..1000000000 {
+        for p3 in &[0b0001010100, 0b1001010100] {
+            for p2 in &[0b1000100101, 0b1011000000, 0b1011000100, 0b1011001000] {
+                for p1 in &[0b1110011011, 0b1110011101] {
+                    let a = p1 + p2 * 2usize.pow(10) + p3 * 2usize.pow(20) + s * 2usize.pow(30);
+                    let mut puter = input.clone();
+                    out.clear();
+                    puter.a = a;
+                    eval(&mut puter, &mut out, true);
+
+                    //                    println!("{:#064b} => {}", a, out.len(),);
+
+                    if out == puter.raw {
+                        return a;
+                    }
+                }
+            }
+        }
+    }
+    panic!("Can't find a solution");
 }
 
 #[cfg(test)]
@@ -185,6 +239,12 @@ Program: 0,1,5,4,3,0";
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse("<EXAMPLE>")), "<RESULT>");
+        let input = "\
+Register A: 2024
+Register B: 0
+Register C: 0
+
+Program: 0,3,5,4,3,0";
+        assert_eq!(part2(&parse(input)), 117440);
     }
 }
