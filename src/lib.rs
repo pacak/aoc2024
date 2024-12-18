@@ -1,5 +1,6 @@
-mod day17;
 mod day16;
+mod day17;
+mod day18;
 use aoc_runner_derive::aoc_lib;
 
 mod day01;
@@ -27,7 +28,7 @@ impl std::fmt::Debug for TwoDee<usize> {
             if self.poi == (col, row) {
                 write!(f, "X   ")?;
             } else {
-                write!(f, "{:>4}", c)?;
+                write!(f, "{:>7}", c)?;
             }
             col += 1;
             if col == self.width {
@@ -240,6 +241,7 @@ impl Point {
     const D: Self = Point { x: 0, y: 1 };
     const L: Self = Point { x: -1, y: 0 };
     const R: Self = Point { x: 1, y: 0 };
+    const DIRS: [Point; 4] = [Self::U, Self::R, Self::D, Self::L];
     fn new(x: usize, y: usize) -> Self {
         Self {
             x: x as i32,
