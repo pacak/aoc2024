@@ -49,10 +49,37 @@ fn go1(available: &BTreeSet<String>, max: usize, q: &str) -> usize {
     0
 }
 
-// #[aoc(day19, part2)]
-// fn part2(input: &str) -> String {
-//     todo!()
-// }
+fn go(avail: &BTreeSet<String>, max: usize, q: &str) -> usize {
+    let mut r = vec![0; q.len() + 1];
+
+    r[0] = 1;
+    'outer: for pos in 0..q.len() {
+        for prefix in 1..=max {
+            if pos + prefix > q.len() {
+                continue 'outer;
+            }
+            let Some((head, _)) = q[pos..].split_at_checked(prefix) else {
+                continue 'outer;
+            };
+            if avail.contains(head) {
+                r[pos + prefix] += r[pos];
+            }
+        }
+    }
+    r[q.len()]
+}
+
+#[aoc(day19, part2)]
+fn part2(input: &(BTreeSet<String>, Vec<String>)) -> usize {
+    let (pats, qs) = input;
+    let max_pat = pats.iter().map(|l| l.len()).max().unwrap_or_default();
+
+    let mut v = 0;
+    for q in qs {
+        v += go(pats, max_pat, q);
+    }
+    v
+}
 
 #[cfg(test)]
 mod tests {
@@ -63,6 +90,7 @@ mod tests {
         let input = "r, wr, b, g, bwu, rb, gb, br\n\nbwurrg";
         assert_eq!(part1(&parse(input)), 1);
     }
+
     #[test]
     fn part1_example() {
         let input = "\
@@ -79,8 +107,25 @@ bbrgwb";
         assert_eq!(part1(&parse(input)), 6);
     }
 
-    // #[test]
-    // fn part2_example() {
-    //     assert_eq!(part2(&parse("<EXAMPLE>")), "<RESULT>");
-    // }
+    #[test]
+    fn part2_small() {
+        let input = "r, wr, b, g, bwu, rb, gb, br\n\nbrwrr";
+        assert_eq!(part2(&parse(input)), 2);
+    }
+
+    #[test]
+    fn part2_example() {
+        let input = "\
+r, wr, b, g, bwu, rb, gb, br
+
+brwrr
+bggr
+gbbr
+rrbgbr
+ubwu
+bwurrg
+brgr
+bbrgwb";
+        assert_eq!(part2(&parse(input)), 16);
+    }
 }
