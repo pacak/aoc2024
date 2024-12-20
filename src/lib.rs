@@ -1,7 +1,8 @@
-mod day19;
 mod day16;
 mod day17;
 mod day18;
+mod day19;
+mod day20;
 use aoc_runner_derive::aoc_lib;
 
 mod day01;
@@ -30,6 +31,31 @@ impl std::fmt::Debug for TwoDee<usize> {
                 write!(f, "X   ")?;
             } else {
                 write!(f, "{:>7}", c)?;
+            }
+            col += 1;
+            if col == self.width {
+                col = 0;
+                row += 1;
+                writeln!(f)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl std::fmt::Debug for TwoDee<Option<usize>> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut col = 0;
+        let mut row = 0;
+        writeln!(f)?;
+        for c in self.data.iter() {
+            if self.poi == (col, row) {
+                write!(f, "X   ")?;
+            } else {
+                match c {
+                    Some(c) => write!(f, "{:>7}", c)?,
+                    None => write!(f, "      -")?,
+                }
             }
             col += 1;
             if col == self.width {
@@ -156,6 +182,25 @@ impl<T> TwoDee<T> {
             width: self.width,
             data: self.data.iter().map(f).collect::<Vec<_>>(),
             poi: self.poi,
+        }
+    }
+
+    fn map_with<U>(self, mut f: impl FnMut(Point, &T) -> U) -> TwoDee<U> {
+        TwoDee {
+            width: self.width,
+            poi: self.poi,
+            data: self
+                .data
+                .iter()
+                .enumerate()
+                .map(|(ix, t)| {
+                    let p = Point {
+                        x: (ix % self.width) as i32,
+                        y: (ix / self.width) as i32,
+                    };
+                    f(p, t)
+                })
+                .collect::<Vec<_>>(),
         }
     }
 
