@@ -321,6 +321,24 @@ impl Point {
     fn r(self) -> Point {
         self + Point::R
     }
+    /// Points within  a certain manhattan distance
+    ///
+    /// TODO - actually write an iterator...
+    fn within(&self, dist: usize) -> impl Iterator<Item = Point> {
+        let dist = dist as i32;
+        let mut points = Vec::new();
+        for dx in -dist..=dist {
+            let mdy = dist - dx.abs();
+            for dy in -mdy..=mdy {
+                let d = Point { x: dx, y: dy };
+                points.push(d + *self)
+            }
+        }
+        points.into_iter()
+    }
+    fn distance(&self, other: Point) -> usize {
+        (self.x - other.x).unsigned_abs() as usize + (self.y - other.y).unsigned_abs() as usize
+    }
 }
 
 #[test]
