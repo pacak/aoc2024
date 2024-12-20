@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use aoc_runner_derive::{aoc, aoc_generator};
 
 #[derive(Debug, Clone)]
@@ -189,7 +190,7 @@ fn part2(input: &Puter) -> usize {
             Instr::Bxl(l) => println!("b ^= {l}"),
             Instr::Bst(c) => println!("b = {c} % 8"),
             Instr::Jnz(l) => println!("jump {l}"),
-            Instr::Bxc(l) => println!("b ^= c"),
+            Instr::Bxc(_) => println!("b ^= c"),
             Instr::Out(c) => println!("write {c} % 8"),
             Instr::Bdv(c) => println!("b = a / {c}"),
             Instr::Cdv(c) => println!("c = a / {c}"),
